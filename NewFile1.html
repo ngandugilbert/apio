@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Location and Pulse Updates</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+</head>
+<body>
+<h3>Live Location Updates</h3>
+<div id="map" style="height: 400px;"></div>
+
+<h3>Live Pulse Updates</h3>
+<div id="pulse">
+    <p>Pulse (BPM): <span id="bpm">-</span></p>
+</div>
+
+<script>
+    // Initialize Leaflet map
+    var map = L.map('map').setView([0, 0], 2);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Establish WebSocket connection for location updates
+    const locationSocket = new WebSocket("ws://localhost:5282/ws/location");
+
+    locationSocket.onopen = () => {
+        console.log("Connected to location WebSocket server");
+    };
+
+    locationSocket.onmessage = (event) => {
+        // Parse the JSON message
+        const data = JSON.parse(event.data);
+
+        // Update the map with the received location data
+        var marker = L.marker([data.Latitude, data.Longitude]).addTo(map);
+        marker.bindPopup(`Latitude: ${data.Latitude.toFixed(2)}<br>Longitude: ${data.Longitude.toFixed(2)}<br>Timestamp: ${new Date(data.Timestamp).toLocaleString()}`).openPopup();
+
+        // Center the map on the new location
+        map.setView([data.Latitude, data.Longitude], 13);
+    };
+
+    locationSocket.onclose = () => {
+        console.log("Disconnected from location WebSocket server");
+    };
+
+    locationSocket.onerror = (error) => {
+        console.error("Location WebSocket error:", error);
+    };
+
+    // Establish WebSocket connection for pulse updates
+    const pulseSocket = new WebSocket("ws://localhost:5282/ws/pulse");
+
+    pulseSocket.onopen = () => {
+        console.log("Connected to pulse WebSocket server");
+    };
+
+    pulseSocket.onmessage = (event) => {
+        // Parse the JSON message
+        const pulseInfo = JSON.parse(event.data);
+
+        // Update the HTML content with the received pulse data
+        document.getElementById("bpm").textContent = pulseInfo.Bpm;
+    };
+
+    pulseSocket.onclose = () => {
+        console.log("Disconnected from pulse WebSocket server");
+    };
+
+    pulseSocket.onerror = (error) => {
+        console.error("Pulse WebSocket error:", error);
+    };
+</script>
+</body>
+</html>
