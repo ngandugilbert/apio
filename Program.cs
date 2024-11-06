@@ -24,7 +24,7 @@ app.Map("/ws/location", async (HttpContext context) =>
     if (context.WebSockets.IsWebSocketRequest)
     {
         using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-        await SendRandomLocations(webSocket);
+        await SendMovingAnimalLocations(webSocket);
     }
     else
     {
@@ -48,16 +48,24 @@ app.Map("/ws/pulse", async (HttpContext context) =>
 
 app.Run();
 
-async Task SendRandomLocations(WebSocket webSocket)
+async Task SendMovingAnimalLocations(WebSocket webSocket)
 {
     var rand = new Random();
     var cancellationToken = new CancellationTokenSource();
 
+    // Initialize with a location in Zambia (Lusaka)
+    double latitude = -15.3875;
+    double longitude = 28.3228;
+
     while (webSocket.State == WebSocketState.Open)
     {
-        // Generate random latitude and longitude
-        var latitude = rand.NextDouble() * 180 - 90;  // Range from -90 to 90
-        var longitude = rand.NextDouble() * 360 - 180; // Range from -180 to 180
+        // Simulate small movements to create gradual, animal-like movement
+        latitude += (rand.NextDouble() - 0.5) * 0.001; // Adjust multiplier for movement speed
+        longitude += (rand.NextDouble() - 0.5) * 0.001;
+
+        // Ensure latitude and longitude stay within bounds
+        latitude = Math.Clamp(latitude, -90, 90);
+        longitude = Math.Clamp(longitude, -180, 180);
 
         // Create a location object
         var location = new
@@ -78,6 +86,8 @@ async Task SendRandomLocations(WebSocket webSocket)
         await Task.Delay(1000, cancellationToken.Token); // Sends a new location every second
     }
 }
+
+
 
 async Task SendPulseUpdates(WebSocket webSocket)
 {

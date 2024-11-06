@@ -32,3 +32,4 @@ C:\Users\ngand\Desktop\dev\LocationApi\obj\Debug\net8.0\refint\LocationApi.dll
 C:\Users\ngand\Desktop\dev\LocationApi\obj\Debug\net8.0\LocationApi.pdb
 C:\Users\ngand\Desktop\dev\LocationApi\obj\Debug\net8.0\LocationApi.genruntimeconfig.cache
 C:\Users\ngand\Desktop\dev\LocationApi\obj\Debug\net8.0\ref\LocationApi.dll
+C:\Users\ngand\Desktop\dev\LocationApi\obj\Debug\net8.0\LocationApi.sourcelink.json
